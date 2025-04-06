@@ -13,7 +13,7 @@
     }
     #map {
       width: 100%;       /* ✅ スマホでも横幅ぴったり */
-      height: 300px;     /* 必要に応じて 100vh や 固定値に */
+      height: 100vh;     /* 必要に応じて 100vh や 固定値に */
     }
     #room-list {
       padding: 10px;
@@ -43,14 +43,17 @@
     }
 
     async function updateStatus(mansionId, roomNumber, status) {
-      await fetch(GAS_ENDPOINT, {
+      fetch("https://corsproxy.io/?" + encodeURIComponent(GAS_ENDPOINT), {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({ mansion_id: mansionId, room_number: roomNumber, status })
+      })
+      .then(res => res.text())
+      .then(data => {
+        console.log("登録結果:", data);
       });
-      alert("登録しました！");
     }
 
     function initMap() {
