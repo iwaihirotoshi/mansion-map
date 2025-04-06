@@ -37,7 +37,7 @@
     function initMap() {
       const map = new google.maps.Map(document.getElementById("map"), {
         zoom: 14.6,
-        center: { lat: 35.6248201,, lng: 139.6409938 } // 用賀駅
+        center: { lat: 35.6248201, lng: 139.6409938 } // 用賀駅
       });
 
       fetchMansions().then(mansions => {
