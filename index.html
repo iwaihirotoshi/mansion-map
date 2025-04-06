@@ -29,6 +29,9 @@
     async function updateStatus(mansionId, roomNumber, status) {
       await fetch(GAS_ENDPOINT, {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify({ mansion_id: mansionId, room_number: roomNumber, status })
       });
       alert("登録しました！");
