@@ -2,9 +2,25 @@
 <html>
 <head>
   <title>マンション訪問記録</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- ✅ 追加！ -->
   <style>
-    #map { height: 400px; width: 100%; }
-    #room-list { margin-top: 20px; }
+    * {
+      box-sizing: border-box;
+    }
+    body, html {
+      margin: 0;
+      padding: 0;
+    }
+    #map {
+      width: 100%;       /* ✅ スマホでも横幅ぴったり */
+      height: 300px;     /* 必要に応じて 100vh や 固定値に */
+    }
+    #room-list {
+      padding: 10px;
+    }
+    button {
+      margin: 2px;
+    }
   </style>
 </head>
 <body>
