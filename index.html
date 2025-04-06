@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>マンション訪問記録</title>
+  <style>
+    #map { height: 400px; width: 100%; }
+    #room-list { margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>マンションマップ</h1>
+  <div id="map"></div>
+
+  <div id="room-list"></div>
+
+  <script>
+    const GAS_ENDPOINT = "https://script.google.com/macros/s/AKfycby8t-Eeu_lxiDJJLzqcq712iP6YsaIZnzMGROfGhH8/exec";
+
+    async function fetchMansions() {
+      const res = await fetch(`${GAS_ENDPOINT}?type=mansions`);
+      return await res.json();
+    }
+
+    async function fetchRooms(mansionId) {
+      const res = await fetch(`${GAS_ENDPOINT}?type=rooms&mansion_id=${mansionId}`);
+      return await res.json();
+    }
+
+    async function updateStatus(mansionId, roomNumber, status) {
+      await fetch(GAS_ENDPOINT, {
+        method: "POST",
+        body: JSON.stringify({ mansion_id: mansionId, room_number: roomNumber, status })
+      });
+      alert("登録しました！");
+    }
+
+    function initMap() {
+      const map = new google.maps.Map(document.getElementById("map"), {
+        zoom: 13,
+        center: { lat: 35.68, lng: 139.76 } // 東京中心
+      });
+
+      fetchMansions().then(mansions => {
+        mansions.forEach(m => {
+          const marker = new google.maps.Marker({
+            position: { lat: parseFloat(m.latitude), lng: parseFloat(m.longitude) },
+            map,
+            title: m.name
+          });
+
+          marker.addListener("click", () => {
+            showRooms(m.id, m.name);
+          });
+        });
+      });
+    }
+
+    function showRooms(mansionId, mansionName) {
+      fetchRooms(mansionId).then(rooms => {
+        const container = document.getElementById("room-list");
+        container.innerHTML = `<h2>${mansionName} の部屋一覧</h2>`;
+        rooms.forEach(room => {
+          const div = document.createElement("div");
+          div.innerHTML = `
+            <strong>${room.room_number}号室</strong>　
+            前回: ${room.last_visited || "なし"}　
+            会えた: ${room.reachable || "不明"}　
+            <button onclick="updateStatus(${mansionId}, '${room.room_number}', '在宅')">在宅</button>
+            <button onclick="updateStatus(${mansionId}, '${room.room_number}', '留守')">留守</button>
+          `;
+          container.appendChild(div);
+        });
+      });
+    }
+
+    window.initMap = initMap;
+  </script>
+
+  <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=initMap">
+  </script>
+</body>
+</html>
