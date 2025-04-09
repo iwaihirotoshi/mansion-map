@@ -2,98 +2,37 @@
 <html>
 <head>
   <title>マンション訪問記録</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- ✅ 追加！ -->
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-    body, html {
-      margin: 0;
-      padding: 0;
-    }
-    #map {
-      width: 100%;       /* ✅ スマホでも横幅ぴったり */
-      height: 100vh;     /* 必要に応じて 100vh や 固定値に */
-    }
-    #room-list {
-      padding: 10px;
-    }
-    button {
-      margin: 2px;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link type="text/css" rel="stylesheet" href="css/bootstrap.css">
+  <link type="text/css" rel="stylesheet" href="css/app.css">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font/css/materialdesignicons.min.css" rel="stylesheet">
+
 </head>
 <body>
-  <h1>マンションマップ</h1>
-  <div id="map"></div>
+  <!-- どこかの共通位置（例: bodyの中） -->
+  <div id="map-page">
+    <div id="map" style="height: 100vh;"></div>
+  </div>
 
-  <div id="room-list"></div>
+  <div id="room-page" style="display:none; padding: 16px;">
+    <h3 id="mansion-title" class="ml-2" onClick="showMapPage()"></h3>
+    <div id="room-list">データを取得中です<br>しばらくお待ちください...</div>
+  </div>
 
-  <script>
-    const GAS_ENDPOINT = "https://script.google.com/macros/s/AKfycbyjOg4FwcAGIe5D3-QkRB5Di8LK7flvqkl5tGqqF2MB1OtuCsutCYrVG9Dj64mbajDe/exec";
+  <div id="room-action" style="display:none; padding: 16px;">
+    <div id="actions"></div>
+    <div class="h4 w-100 text-center mt-5 mb-3">訪問履歴</div>
+    <div id="visit-history" class="mt-4"></div>
+  </div>
 
-    async function fetchMansions() {
-      const res = await fetch(`${GAS_ENDPOINT}?type=mansions`);
-      return await res.json();
-    }
-
-    async function fetchRooms(mansionId) {
-      const res = await fetch(`${GAS_ENDPOINT}?type=rooms&mansion_id=${mansionId}`);
-      return await res.json();
-    }
-
-    async function updateStatus(mansionId, roomNumber, status) {
-      const res = await fetch(`${GAS_ENDPOINT}?type=update_status&mansion_id=${mansionId}&room_number=${roomNumber}&status=${status}`);
-      if (!res.ok) {
-        console.error("Error updating status:", res.statusText);
-        return;
-      }
-    }
-
-    function initMap() {
-      const map = new google.maps.Map(document.getElementById("map"), {
-        zoom: 14.6,
-        center: { lat: 35.6248201, lng: 139.6409938 } // 用賀駅
-      });
-
-      fetchMansions().then(mansions => {
-        mansions.forEach(m => {
-          const marker = new google.maps.Marker({
-            position: { lat: parseFloat(m.latitude), lng: parseFloat(m.longitude) },
-            map,
-            title: m.name
-          });
-
-          marker.addListener("click", () => {
-            showRooms(m.id, m.name);
-          });
-        });
-      });
-    }
-
-    function showRooms(mansionId, mansionName) {
-      fetchRooms(mansionId).then(rooms => {
-        const container = document.getElementById("room-list");
-        container.innerHTML = `<h2>${mansionName} の部屋一覧</h2>`;
-        rooms.forEach(room => {
-          const div = document.createElement("div");
-          div.innerHTML = `
-            <strong>${room.room_number}号室</strong>　
-            前回: ${room.last_visited || "なし"}　
-            会えた: ${room.reachable || "不明"}　
-            <button onclick="updateStatus(${mansionId}, '${room.room_number}', '在宅')">在宅</button>
-            <button onclick="updateStatus(${mansionId}, '${room.room_number}', '留守')">留守</button>
-          `;
-          container.appendChild(div);
-        });
-      });
-    }
-
-    window.initMap = initMap;
+  <script type="text/javascript" src="js/app.js"></script>
+  <script
+    async
+    defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC6sG1Or37yJ_4noRHh49WXHpdBHuQkV9Q&callback=initMap&v=beta&libraries=marker">
   </script>
-
-  <script async defer
+  <!-- <script async defer
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC4kJJIziNPKBaYQLDP2eVRfxKLCuhi9Kw&callback=initMap">
-  </script>
+  </script> -->
 </body>
 </html>
