@@ -29,7 +29,7 @@ function initMap() {
       });
 
       marker.addListener("click", () => {
-        showRoomPage(m.id, m.name);
+        showRoomPage(m);
       });
     });
   });
@@ -53,14 +53,17 @@ function showMapPage() {
 }
 
 // 部屋リスト表示
-function showRoomPage(mansionId, mansionName) {
+function showRoomPage(m) {
   init();
   document.getElementById("map-page").style.display = "none";
   document.getElementById("room-page").style.display = "block";
   document.getElementById("room-action").style.display = "none";
-  document.getElementById("mansion-title").textContent = "< "+mansionName;
+  document.getElementById("mansion-title").textContent = "< "+m.name;
+  document.getElementById("mansion-type").textContent = "タイプ："+m.type;
+  document.getElementById("mansion-address").textContent = "住所：" + m.address;
+  document.getElementById("mansion-memo").textContent = "メモ：" + m.memo;
 
-  fetchRooms(mansionId).then(rooms => {
+  fetchRooms(m.id).then(rooms => {
     const container = document.getElementById("room-list");
     container.innerHTML = "";
 
@@ -88,7 +91,7 @@ function showRoomPage(mansionId, mansionName) {
         const roomRowDiv = document.createElement("div");
         roomRowDiv.className = "row g-2 mb-2 p-2 border-bottom room-row";
         roomRowDiv.style.cursor = "pointer";
-        roomRowDiv.onclick = () => showRoomActionPage(room, mansionName);
+        roomRowDiv.onclick = () => showRoomActionPage(room, m.name);
 
         // ボタン（状態によって見た目変わる）
         const col = document.createElement("div");
