@@ -1,5 +1,6 @@
 
 const GAS_ENDPOINT = "https://script.google.com/macros/s/AKfycbzivYNih0t_xoVyNarNNopchv_oPwAJmONFZwD0mZlUGf6nKzCfkKJjVO-jJ9tiDbvj/exec";
+let currentMansion = null;
 
 // マンション情報取得
 async function fetchMansions() {
@@ -54,6 +55,7 @@ function showMapPage() {
 
 // 部屋リスト表示
 function showRoomPage(m) {
+  currentMansion = m;
   init();
   document.getElementById("map-page").style.display = "none";
   document.getElementById("room-page").style.display = "block";
@@ -91,7 +93,7 @@ function showRoomPage(m) {
         const roomRowDiv = document.createElement("div");
         roomRowDiv.className = "row g-2 mb-2 p-2 border-bottom room-row";
         roomRowDiv.style.cursor = "pointer";
-        roomRowDiv.onclick = () => showRoomActionPage(room, m.name);
+        roomRowDiv.onclick = () => showRoomActionPage(room);
 
         // ボタン（状態によって見た目変わる）
         const col = document.createElement("div");
@@ -153,7 +155,7 @@ function showRoomPage(m) {
 
 
 // 部屋アクション表示
-function showRoomActionPage(room, currentMansionName) {
+function showRoomActionPage(room) {
   init();
   document.getElementById("map-page").style.display = "none";
   document.getElementById("room-page").style.display = "none";
@@ -165,7 +167,7 @@ function showRoomActionPage(room, currentMansionName) {
 
   // ヘッダー
   let html = `
-    <h3 class="ml-2" onClick="showRoomPage(${room.mansion_id}, '${currentMansionName}')">< ${room.room_number}号室</h3>
+    <h3 class="ml-2" onClick="showRoomPage(currentMansion)">< ${room.room_number}号室</h3>
     <div class="h4 w-100 text-center mt-5 mb-3">訪問の記録をつける</div>
   `;
 
@@ -181,10 +183,10 @@ function showRoomActionPage(room, currentMansionName) {
     html += `
       <div class="row g-2 mb-3" id="action-buttons">
         <div class="offset-1 col-5">
-          <button id="home-button" class="btn btn-success w-100 pt-5 pb-5 h3" onclick="handleUpdateStatus(${room.id}, '在宅', ${room.mansion_id}, '${currentMansionName}')">在宅</button>
+          <button id="home-button" class="btn btn-success w-100 pt-5 pb-5 h3" onclick="handleUpdateStatus(${room.id}, '在宅')">在宅</button>
         </div>
         <div class="col-5">
-          <button id="away-button" class="btn btn-warning w-100 pt-5 pb-5 h3" onclick="handleUpdateStatus(${room.id}, '留守', ${room.mansion_id}, '${currentMansionName}')">留守</button>
+          <button id="away-button" class="btn btn-warning w-100 pt-5 pb-5 h3" onclick="handleUpdateStatus(${room.id}, '留守')">留守</button>
         </div>
       </div>
     `;
@@ -237,7 +239,7 @@ function showRoomActionPage(room, currentMansionName) {
               <h4>
                 管理者
               </h4>
-              <button class="btn btn-danger" onclick="deleteRecord(${record.id}, ${room.mansion_id}, '${currentMansionName}')">取消</button>
+              <button class="btn btn-danger" onclick="deleteRecord(${record.id})">取消</button>
             </div>
           </div>
         </div>
@@ -252,7 +254,7 @@ function showRoomActionPage(room, currentMansionName) {
 
 
 // ステータス更新
-function handleUpdateStatus(roomId, status, mansionId, mansionName) {
+function handleUpdateStatus(roomId, status) {
   // スボタンを非表示
   const targetBtn = document.getElementById("action-buttons");
   if (targetBtn) targetBtn.style.display = "none";
@@ -269,7 +271,7 @@ function handleUpdateStatus(roomId, status, mansionId, mansionName) {
   // 通信
   updateStatus(roomId, status).then(() => {
     alert("訪問の記録が完了しました");
-    showRoomPage(mansionId, mansionName);
+    showRoomPage(currentMansion);
     if (targetBtn) targetBtn.style.display = "block";
     if (visitHistory) visitHistory.style.display = "block";
   }).catch(err => {
@@ -290,7 +292,7 @@ async function updateStatus(roomId, status) {
 }
 
 // 記録削除
-async function deleteRecord(recordId, mansionId, mansionName) {
+async function deleteRecord(recordId) {
   if (!confirm("この記録を取り消しますか？")) return;
   // ボタンを非表示
   const targetBtn = document.getElementById("action-buttons");
@@ -312,7 +314,7 @@ async function deleteRecord(recordId, mansionId, mansionName) {
 
     if (json.success === "OK") {
       // 最新情報を再表示
-      showRoomPage(mansionId, mansionName);
+      showRoomPage(currentMansion);
 
       if (targetBtn) targetBtn.style.display = "block";
       if (visitHistory) visitHistory.style.display = "block";
