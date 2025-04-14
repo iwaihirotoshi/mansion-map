@@ -20,6 +20,7 @@ function initMap() {
     zoom: 14.0, // ズームレベル
     center: { lat: 35.624574, lng: 139.631171 }, // 区域の中心地
     mapId:'665daec8de980ec1',
+    gestureHandling: "greedy",
   });
 
   fetchMansions().then(mansions => {
